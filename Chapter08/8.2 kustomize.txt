@@ -1,0 +1,66 @@
+# 通过configMapGenerator生成一个ConfigMap配置文件
+# kustomization.yaml
+configMapGenerator:
+- name: example-configmap-1
+  files:
+  - application.properties
+
+
+# 通过kubectl kustomize命令一键生成ConfigMap对象的配置文件
+kubectl kustomize ./
+
+
+
+
+# 通过环境文件（.env）生成ConfigMap配置文件
+# cat .env
+FOO=Bar
+
+# kustomization.yaml
+configMapGenerator:
+- name: example-configmap-1
+  envs:
+  - .env
+
+kubectl kustomize ./
+
+
+
+
+# 组合不同的资源作为一个应用或者一个管理单元进行整体管理
+# deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+  labels:
+    app: my-app
+spec:
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: app
+        image: my-app
+        volumeMounts:
+        - name: config
+          mountPath: /config
+      volumes:
+      - name: config
+        configMap:
+          name: example-configmap-1
+
+# kustomization.yaml
+resources:
+- deployment.yaml
+configMapGenerator:
+- name: example-configmap-1
+  files:
+  - application.properties
+
+kubectl kustomize ./

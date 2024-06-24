@@ -1,0 +1,18 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-timeout
+spec:
+  backoffLimit: 5
+  activeDeadlineSeconds: 2
+  template:
+    metadata:
+      labels:
+        type: longrunning
+    spec:
+      containers:
+      - name: busybox
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: ["sh", "-c", "echo hello && sleep 3 && exit 1"]
+      restartPolicy: Never

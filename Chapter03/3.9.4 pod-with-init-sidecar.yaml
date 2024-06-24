@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-with-init-sidecar
+  labels:
+    app: init-sidecar
+spec:
+  initContainers:
+  - name: create-log-file
+    image: busybox
+    imagePullPolicy: IfNotPresent
+    command: ['sh', '-c', 'touch /opt/logs.txt']
+    volumeMounts:
+    - name: data
+      mountPath: /opt
+  - name: log-reader
+    image: busybox
+    imagePullPolicy: IfNotPresent
+    command: ['sh', '-c', 'tail -f /opt/logs.txt']
+    restartPolicy: Always
+    readinessProbe:
+      exec:
+        command: ["sh", "-c", "ls /opt/logs.txt"]
+      initialDelaySeconds: 1
+      timeoutSeconds: 1
+    volumeMounts:
+    - name: data
+      mountPath: /opt
+  containers:
+  - name: log-writer
+    image: busybox
+    imagePullPolicy: IfNotPresent
+    command: ['sh', '-c', 'i=1; while true; do echo "$i hello" >> /opt/logs.txt; i=$((i+1)); sleep 1; done']
+    volumeMounts:
+    - name: data
+      mountPath: /opt
+  volumes:
+  - name: data
+    emptyDir: {}

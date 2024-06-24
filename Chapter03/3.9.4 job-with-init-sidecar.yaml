@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-with-init-sidecar
+spec:
+  template:
+    metadata:
+      labels:
+        app: init-sidecar
+    spec:
+      initContainers:
+      - name: create-log-file
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: ['sh', '-c', 'touch /opt/logs.txt']
+        volumeMounts:
+        - name: data
+          mountPath: /opt
+      - name: log-reader
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        restartPolicy: Always
+        command: ['sh', '-c', 'tail -f /opt/logs.txt']
+        volumeMounts:
+        - name: data
+          mountPath: /opt
+      containers:
+      - name: log-writer
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: ['sh', '-c', 'echo "logging" > /opt/logs.txt']
+        volumeMounts:
+        - name: data
+          mountPath: /opt
+      volumes:
+      - name: data
+        emptyDir: {}
+      restartPolicy: Never

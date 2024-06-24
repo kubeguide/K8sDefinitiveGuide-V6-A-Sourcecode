@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-with-init-2
+spec:
+  initContainers:
+  - name: wait-for-service-a
+    image: busybox
+    imagePullPolicy: IfNotPresent
+    command:
+    - sh
+    - -c
+    - until wget -q service-a:8080; do echo -e "waiting for service-a"; sleep 5; done; echo -e "service-a ready, starting service-b now";
+  containers:
+  - name: service-b
+    image: nginx
+    imagePullPolicy: IfNotPresent
+    ports:
+    - containerPort: 80

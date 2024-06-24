@@ -1,0 +1,19 @@
+# 设置目标Node为不可调度
+kubectl cordon k8s-node-1
+
+kubectl patch node k8s-node-1 -p '{"spec":{"unschedulable":true}}'
+
+
+---
+apiVersion: v1
+kind: Node
+metadata:
+  name: k8s-node-1
+  labels:
+    kubernetes.io/hostname: k8s-node-1
+spec:
+  unschedulable: true
+
+
+# 将Node重新纳入可调度的范围内
+kubectl uncordon k8s-node-1

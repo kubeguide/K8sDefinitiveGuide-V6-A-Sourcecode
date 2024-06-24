@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-podfailurepolicy
+spec:
+  completions: 9
+  parallelism: 3
+  backoffLimit: 9
+  podFailurePolicy:
+    rules:
+    - action: FailJob
+      onExitCodes:
+        containerName: main
+        operator: In
+        values: [2,4]
+  template:
+    metadata:
+      labels:
+        type: exception
+    spec:
+      containers:
+      - name: main
+        image: busybox
+        imagePullPolicy: IfNotPresent

@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluentd
+  namespace: kube-system
+  labels:
+    k8s-app: fluentd
+spec:
+  selector:
+    matchLabels:
+      app: fluentd
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  template:
+    metadata:
+      namespace: kube-system
+      labels:
+        app: fluentd
+    spec:
+      containers:
+      - name: fluentd:v1.16.0-1.0
+        image: fluentd
+        resources:
+          limits:
+            cpu: 100m
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 200Mi
+        volumeMounts:
+        - name: varlog
+          mountPath: /var/log
+      volumes:
+      - name: varlog
+        hostPath:
+          path: /var/log

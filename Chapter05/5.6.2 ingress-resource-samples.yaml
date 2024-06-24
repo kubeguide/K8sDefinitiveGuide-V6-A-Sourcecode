@@ -1,0 +1,153 @@
+# Ingress资源对象的定义示例
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mywebsite-ingress
+spec:
+  rules:
+  - host: mywebsite.com
+    http:
+      paths:
+      - path: /demo
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: webapp
+            port:
+              number: 8080
+
+
+# 后端（backend）设置
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-resource-backend
+spec:
+  defaultBackend:
+    resource:
+      apiGroup: k8s.example.com
+      kind: StorageBucket
+      name: static-assets
+  rules:
+    - http:
+        paths:
+          - path: /icons
+            pathType: ImplementationSpecific
+            backend:
+              resource:
+                apiGroup: k8s.example.com
+                kind: StorageBucket
+                name: icon-assets
+
+
+# host通配符设置
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-wildcard-host
+spec:
+  rules:
+  - host: "foo.bar.com"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/bar"
+        backend:
+          service:
+            name: service1
+            port:
+              number: 80
+  - host: "*.foo.com"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/foo"
+        backend:
+          service:
+            name: service2
+            port:
+              number: 80
+
+
+
+
+# ingressClassName和IngressClass资源对象
+---
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: external-lb
+spec:
+  controller: example.com/ingress-controller
+  parameters:
+    apiGroup: k8s.example.com
+    kind: IngressParameters
+    name: external-lb
+
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: example-ingress
+spec:
+  ingressClassName: external-lb
+  rules:
+  - host: "*.example.com"
+    http:
+      paths:
+      - path: /example
+        pathType: Prefix
+        backend:
+          service:
+            name: example-service
+            port:
+              number: 80
+
+
+# IngressClass的作用范围（集群范围或命名空间范围）
+# 集群范围的IngressClass
+---
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: external-lb-1
+spec:
+  controller: example.com/ingress-controller
+  parameters:
+    scope: Cluster
+    apiGroup: k8s.example.net
+    kind: ClusterIngressParameter
+    name: external-config-1
+
+# 命名空间范围的IngressClass
+---
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: external-lb-2
+spec:
+  controller: example.com/ingress-controller
+  parameters:
+    scope: Namespace
+    apiGroup: k8s.example.com
+    kind: IngressParameter
+    namespace: external-configuration
+    name: external-config
+
+
+# 集群默认的IngressClass
+---
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+  name: nginx-example
+  annotations:
+    ingressclass.kubernetes.io/is-default-class: "true"
+spec:
+  controller: k8s.io/ingress-nginx

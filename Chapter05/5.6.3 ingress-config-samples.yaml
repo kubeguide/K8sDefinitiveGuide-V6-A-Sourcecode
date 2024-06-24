@@ -1,0 +1,92 @@
+# 转发给单个后端服务
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: test-ingress
+spec:
+  defaultBackend:
+    service:
+      name: webapp
+      port:
+        number: 8080
+
+
+
+
+# 将同一域名的不同URL路径转发给不同的后端服务（Simple Fanout）
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: simple-fanout-example
+spec:
+  rules:
+  - host: mywebsite.com
+    http:
+      paths:
+      - path: /web
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: web-service
+            port:
+              number: 8080
+      - path: /api
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: api-service
+            port:
+              number: 8081
+
+
+
+# 将HTTP请求根据不同的域名（虚拟主机名）转发给不同的后端服务
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: name-virtual-host-ingress
+spec:
+  rules:
+  - host: foo.bar.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: service1
+            port:
+              number: 80
+  - host: bar.foo.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: service2
+            port:
+              number: 80
+
+
+
+# 不使用域名的转发规则
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: test-ingress
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /demo
+        pathType: Prefix
+        backend:
+          service:
+            name: webapp
+            port:
+              number: 8080

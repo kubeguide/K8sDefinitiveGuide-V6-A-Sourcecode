@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cm-test-app-cm-volume-optional
+spec:
+  containers:
+  - name: tomcat
+    image: busybox
+    command: [ "/bin/sh", "-c", "tail -f /dev/null" ]
+    volumeMounts:
+    - name: serverxml
+      mountPath: /configfiles
+  volumes:
+  - name: serverxml
+    configMap:
+      name: cm-appconfigfiles
+      optional: true

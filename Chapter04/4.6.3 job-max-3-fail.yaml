@@ -1,0 +1,17 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-max-3-fail
+spec:
+  template:
+    metadata:
+      labels:
+        type: exception
+    spec:
+      containers:
+      - name: hello
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: ["sh", "-c", "echo hello && sleep 1 && exit 1"]
+      restartPolicy: OnFailure
+  backoffLimit: 3

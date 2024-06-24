@@ -1,0 +1,69 @@
+# nginx-deployment.yaml
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  labels:
+    name: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      name: nginx
+  template:
+    metadata:
+      labels:
+        name: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        ports:
+        - containerPort: 80
+          protocol: TCP
+
+
+# pdb.yaml
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: nginx
+spec:
+  minAvailable: 3
+  selector:
+    matchLabels:
+      name: nginx
+
+
+
+# 驱逐一个特定的Pod
+
+# eviction.json
+{
+  "apiVersion": "policy/v1",
+  "kind": "Eviction",
+  "metadata": {
+    "name": "nginx-64888c994d-9cj7z",
+    "namespace": "default"
+  }
+}
+
+curl -v -H 'Content-type: application/json' -k --cert ./admin.crt --key ./admin.key https://192.168.18.3:6443/api/v1/namespaces/default/pods/nginx-64888c994d-9cj7z/eviction -d @eviction.json
+
+
+
+
+# 设置了unhealthyPodEvictionPolicy=AlwaysAllow策略的PDB配置示例
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: nginx
+spec:
+  selector:
+    matchLabels:
+      name: nginx
+  maxUnavailable: 1
+  unhealthyPodEvictionPolicy: AlwaysAllow

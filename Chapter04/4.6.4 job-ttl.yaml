@@ -1,0 +1,14 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-ttl
+spec:
+  ttlSecondsAfterFinished: 10
+  template:
+    spec:
+      containers:
+      - name: hello
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: ["sh", "-c", "echo hello && sleep 1 && exit 0"]
+      restartPolicy: Never

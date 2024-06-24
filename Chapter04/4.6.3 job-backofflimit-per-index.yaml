@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-backofflimit-per-index
+spec:
+  completions: 10
+  parallelism: 3
+  completionMode: Indexed
+  backoffLimitPerIndex: 1
+  maxFailedIndexes: 5
+  template:
+    metadata:
+      labels:
+        type: exception
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: example
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: ["sh", "-c", "echo hello && sleep 1 && if [ `expr $JOB_COMPLETION_INDEX % 2` -ne 0 ]; then exit 1; fi"]

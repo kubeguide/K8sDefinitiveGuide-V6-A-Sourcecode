@@ -1,0 +1,16 @@
+apiVersion: kubescheduler.config.k8s.io/v1beta3
+kind: KubeSchedulerConfiguration
+profiles:
+  - schedulerName: default-scheduler
+  - schedulerName: foo-scheduler
+    pluginConfig:
+      - name: NodeAffinity
+        args:
+          addedAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: scheduler-profile
+                  operator: In
+                  values:
+                  - foo

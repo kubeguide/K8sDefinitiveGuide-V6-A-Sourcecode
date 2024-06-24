@@ -1,0 +1,52 @@
+# Pod指定名为“my-scheduler”的自定义调度器
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  schedulerName: my-scheduler
+  containers:
+  - name: nginx
+    image: nginx
+
+
+
+# 多调度器配置（Multi Scheduling Profiles）
+# kube-scheduler-profiles.yaml
+---
+apiVersion: kubescheduler.config.k8s.io/v1
+kind: KubeSchedulerConfiguration
+clientConnection:
+  kubeconfig: /etc/kubernetes/scheduler.conf
+profiles:
+  - schedulerName: default-scheduler
+  - schedulerName: no-scoring-scheduler
+    plugins:
+      preScore:
+        disabled:
+        - name: '*'
+      score:
+        disabled:
+        - name: '*'
+
+
+# Pod使用新调度器的schedulerName设置
+# pod-new-scheduler.yaml
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: command-demo
+  labels:
+    purpose: demonstrate-command
+spec:
+  schedulerName: no-scoring-scheduler
+  containers:
+  - name: command-demo-container
+    image: busybox
+    command: ["printenv"]
+    args: ["HOSTNAME", "KUBERNETES_PORT"]
+  restartPolicy: OnFailure

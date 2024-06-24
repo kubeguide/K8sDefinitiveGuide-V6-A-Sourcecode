@@ -1,0 +1,83 @@
+# dev-resourcequota.yaml
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: dev-resourcequota
+  namespace: development
+spec:
+  hard:
+    persistentvolumeclaims: "2"
+    services.loadbalancers: "2"
+    services.nodeports: "0"
+    pods: "4"
+    requests.cpu: "1"
+    requests.memory: 1Gi
+    limits.cpu: "2"
+    limits.memory: 2Gi
+
+
+# dev-limitrange.yaml
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: dev-limitrange
+  namespace: development
+spec:
+  limits:
+  - max:
+      cpu: "4"
+      memory: 2Gi
+    min:
+      cpu: 200m
+      memory: 6Mi
+    maxLimitRequestRatio:
+      cpu: 3
+      memory: 2
+    type: Pod
+  - default:
+      cpu: 300m
+      memory: 200Mi
+    defaultRequest:
+      cpu: 200m
+      memory: 100Mi
+    max:
+      cpu: "2"
+      memory: 1Gi
+    min:
+      cpu: 100m
+      memory: 3Mi
+    maxLimitRequestRatio:
+      cpu: 5
+      memory: 4
+    type: Container
+
+
+
+# 对租户命名空间中不同QoS级别Pod的资源配额进行更详细的限制
+# qos-resourcequota-development.yaml
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: besteffort-resourcequota-development
+  namespace: development
+spec:
+  hard:
+    pods: "10"
+  scopes:
+  - BestEffort
+
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: notbesteffort-resourcequota-development
+spec:
+  hard:
+    pods: "4"
+    requests.cpu: "1"
+    requests.memory: 1Gi
+    limits.cpu: "2"
+    limits.memory: 2Gi
+  scopes:
+  - NotBestEffort
+

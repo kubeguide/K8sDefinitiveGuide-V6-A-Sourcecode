@@ -1,0 +1,101 @@
+# Guaranteed
+
+# 未定义Requests值，所以其默认等于Limits值
+containers:
+    name: foo
+        resources:
+            limits:
+                cpu: 10m
+                memory: 1Gi
+    name: bar
+        resources:
+            limits:
+                cpu: 100m
+                memory: 100Mi
+
+# 每个容器定义的Requests的值与Limits的值完全相同
+containers:
+    name: foo
+        resources:
+            limits:
+                cpu: 10m
+                memory: 1Gi
+            requests:
+                cpu: 10m
+                memory: 1Gi
+    name: bar
+        resources:
+            limits:
+                cpu: 100m
+                memory: 100Mi
+            requests:
+                cpu: 100m
+                memory: 100Mi
+
+
+
+
+# BestEffort
+
+# Pod中所有容器都未定义资源配置（Requests和Limits都未定义）
+containers:
+    name: foo
+        resources:
+    name: bar
+        resources:
+
+
+
+
+# Burstable
+
+# （1）为容器foo配置的CPU Requests的值与Limits的值不同：
+containers:
+    name: foo
+        resources:
+            limits:
+                cpu: 10m
+                memory: 1Gi
+            requests:
+                cpu: 5m
+                memory: 1Gi
+    name: bar
+        resources:
+            limits:
+                cpu: 10m
+                memory: 1Gi
+            requests:
+                cpu: 10m
+                memory: 1Gi
+
+# （2）容器bar未定义资源配置，而容器foo定义了资源配置：
+containers:
+    name: foo
+        resources:
+            limits:
+                cpu: 10m
+                memory: 1Gi
+            requests:
+                cpu: 10m
+                memory: 1Gi
+    name: bar
+
+# （3）容器foo未定义CPU，而容器bar未定义内存：
+containers:
+    name: foo
+        resources:
+            limits:
+                memory: 1Gi
+    name: bar
+        resources:
+            limits:
+                cpu: 100m
+
+# （4）容器bar未定义资源配置，而容器foo未定义Limits的值：
+containers:
+    name: foo
+        resources:
+            requests:
+                cpu: 10m
+                memory: 1Gi
+    name: bar

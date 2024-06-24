@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-with-node-affinity-weight
+spec:
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchExpressions:
+          - key: zone
+            operator: In
+            values:
+            - north
+      - weight: 50
+        preference:
+          matchExpressions:
+          - key: disk-type
+            operator: In
+            values:
+            - ssd
+  containers:
+  - name: nginx
+    image: nginx

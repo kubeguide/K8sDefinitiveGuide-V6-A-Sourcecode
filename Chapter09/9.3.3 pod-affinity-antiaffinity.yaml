@@ -1,0 +1,99 @@
+# 参照目标Pod
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-flag
+  labels:
+    security: "S1"
+    app: "nginx"
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+
+
+# Pod的亲和性调度
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-affinity
+spec:
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: security
+            operator: In
+            values:
+            - S1
+        topologyKey: kubernetes.io/hostname
+  containers:
+  - name: pod-affinity
+    image: nginx
+
+
+# Pod的反亲和性调度
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-anti-affinity
+spec:
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: security
+            operator: In
+            values:
+            - S1
+        topologyKey: topology.kubernetes.io/zone
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: app
+            operator: In
+            values:
+            - nginx
+        topologyKey: kubernetes.io/hostname
+  containers:
+  - name: pod-anti-affinity
+    image: nginx
+
+
+
+
+# 设置了反亲和性策略实现同一个Node上不运行多个Pod副本的需求
+# app-with-anti-affinity.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-with-anti-affinity
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - nginx
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: nginx
+        image: nginx

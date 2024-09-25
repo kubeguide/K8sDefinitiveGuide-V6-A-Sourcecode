@@ -22,3 +22,5 @@ spec:
       - name: main
         image: busybox
         imagePullPolicy: IfNotPresent
+        command: ["sh", "-c", "sleep 1 && c=`expr $RANDOM % 6` && echo exit $c && exit $c"]
+      restartPolicy: Never
